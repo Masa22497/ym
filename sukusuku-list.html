@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>すくすくリスト - 産前準備の買い物リスト</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+
+:root {
+  --paper: #F6F1E7;
+  --card: #FFFDF8;
+  --ink: #34302A;
+  --ink-soft: #6B6255;
+  --muted: #B9AD98;
+  --border: #E5DBC8;
+  --moss: #7C8B6A;
+  --moss-dark: #5C6A4D;
+  --moss-light: #A9B896;
+  --apricot: #E2A15E;
+  --apricot-dark: #C67F3B;
+  --apricot-light: #EFC08B;
+  --dusty-blue: #8CA3AC;
+  --clay: #CB8A5C;
+  --clay-dark: #B5754A;
+  --soil: #6B4E37;
+  --danger: #C4695B;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Meiryo', sans-serif;
+}
+
+h1, h2 { font-family: 'Shippori Mincho', serif; margin: 0; }
+button { font-family: inherit; cursor: pointer; }
+input, select { font-family: inherit; color: var(--ink); }
+
+#app {
+  min-height: 100vh;
+  padding: 20px 16px 60px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+/* ---------- Offline / storage notice ---------- */
+.storage-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #EAF0E3;
+  border: 1px solid var(--moss-light);
+  color: var(--moss-dark);
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+.storage-banner button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--moss-dark);
+  font-size: 12px;
+  text-decoration: underline;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ---------- Header / Hero ---------- */
+
+.hero {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.brand-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--moss); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 22px;
+}
+
+.brand h1 { font-size: 22px; color: var(--ink); letter-spacing: 0.02em; }
+.tagline { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+
+.hero-top-actions {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+
+.due-date-control { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.due-date-field {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; color: var(--ink-soft);
+  background: var(--paper); border: 1px solid var(--border);
+  border-radius: 10px; padding: 7px 10px;
+}
+.due-date-field input { border: none; background: transparent; font-size: 13px; color: var(--ink); outline: none; }
+
+.countdown-badge {
+  font-size: 12px; font-weight: 700; color: var(--moss-dark);
+  background: #EAF0E3; padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+}
+.countdown-badge.soon { color: var(--apricot-dark); background: #FBEBD5; }
+.countdown-badge.past { color: var(--ink-soft); background: var(--border); }
+
+.hero-body { display: flex; gap: 20px; align-items: center; }
+
+.sprout-svg { flex-shrink: 0; }
+.sprout-stem { transition: y 0.7s cubic-bezier(0.34,1.2,0.4,1), height 0.7s cubic-bezier(0.34,1.2,0.4,1); }
+.sprout-leaf { transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+
+.hero-stats { flex: 1; min-width: 0; }
+
+.stat-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.stat-label { font-size: 13px; color: var(--ink-soft); }
+.stat-value { font-family: 'Shippori Mincho', serif; font-size: 26px; color: var(--moss-dark); font-weight: 700; }
+
+.progress-track { height: 9px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--moss-light), var(--moss)); border-radius: 999px; transition: width 0.7s cubic-bezier(0.34,1.2,0.4,1); }
+
+.stat-sub { display: block; font-size: 12px; color: var(--ink-soft); margin: 6px 0 14px; }
+
+.budget-row {
+  border-top: 1px dashed var(--border); padding-top: 12px;
+  display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+}
+.budget-field { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-soft); }
+.budget-field input {
+  width: 84px; border: 1px solid var(--border); border-radius: 8px;
+  padding: 5px 7px; font-size: 13px; outline: none; background: var(--paper);
+}
+.budget-field input:focus { border-color: var(--moss); }
+
+.budget-summary { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--ink-soft); }
+.budget-summary strong { color: var(--ink); font-weight: 700; }
+.over-budget strong { color: var(--danger) !important; }
+
+/* ---------- Toolbar ---------- */
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; align-items: center; }
+
+.search-box {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 10px; flex: 1 1 180px; min-width: 140px; color: var(--ink-soft);
+}
+.search-box input { border: none; outline: none; background: transparent; font-size: 13.5px; color: var(--ink); width: 100%; }
+
+select.filter-select {
+  appearance: none;
+  background: var(--card) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3 L5 7 L9 3' stroke='%236B6255' stroke-width='1.4' fill='none'/></svg>") no-repeat right 10px center;
+  border: 1px solid var(--border); border-radius: 10px; padding: 8px 26px 8px 10px;
+  font-size: 13px; color: var(--ink); outline: none;
+}
+select.filter-select:focus { border-color: var(--moss); }
+
+.toolbar-buttons { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; border-radius: 10px;
+  padding: 9px 14px; font-size: 13.5px; font-weight: 600; border: 1px solid transparent;
+  transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: var(--moss); color: #fff; }
+.btn.primary:hover { background: var(--moss-dark); }
+.btn.primary:disabled { background: var(--muted); cursor: not-allowed; }
+.btn.ghost { background: var(--card); color: var(--ink); border-color: var(--border); }
+.btn.ghost:hover { border-color: var(--moss); }
+.btn.small { padding: 6px 11px; font-size: 12px; }
+
+.backup-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.backup-row .btn { font-size: 12px; padding: 7px 12px; }
+
+/* ---------- List / Category ---------- */
+
+.list-area { display: flex; flex-direction: column; gap: 12px; }
+
+.empty-state {
+  text-align: center; background: var(--card); border: 1px dashed var(--border);
+  border-radius: 18px; padding: 48px 20px; color: var(--ink-soft);
+}
+.empty-state .emoji { font-size: 34px; margin-bottom: 8px; }
+.empty-state h2 { font-size: 18px; color: var(--ink); margin-bottom: 6px; }
+.empty-state p { font-size: 13.5px; margin: 0 0 18px; }
+.empty-state-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.category-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+
+.category-header {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; background: transparent; border: none; text-align: left; color: var(--ink);
+}
+.category-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14.5px; color: var(--moss-dark); }
+.category-title .cat-emoji { font-size: 16px; }
+
+.category-header-right { display: flex; align-items: center; gap: 10px; color: var(--ink-soft); }
+.category-progress-track { width: 64px; height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.category-progress-fill { height: 100%; background: var(--apricot); transition: width 0.5s ease; }
+.category-count { font-size: 12px; min-width: 34px; text-align: right; }
+
+.category-body { border-top: 1px solid var(--border); padding: 6px 10px 10px; }
+.empty-hint { color: var(--muted); font-size: 12.5px; padding: 14px 6px; text-align: center; }
+
+.category-add-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; margin-top: 4px; padding: 10px; border-radius: 10px;
+  border: 1px dashed var(--border); background: transparent; color: var(--moss-dark);
+  font-size: 12.5px; font-weight: 600; transition: background 0.15s ease, border-color 0.15s ease;
+}
+.category-add-btn:hover { background: var(--paper); border-color: var(--moss); }
+
+/* ---------- Item row ---------- */
+
+.item-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 6px; border-bottom: 1px solid var(--border); }
+.item-row:last-child { border-bottom: none; }
+
+.status-track { display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-top: 3px; }
+.stage-btn {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--card); color: var(--muted); display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; flex-shrink: 0; font-size: 12px;
+}
+.stage-btn:hover { border-color: var(--dusty-blue); }
+.stage-btn:active { transform: scale(0.92); }
+.stage-btn.done { background: var(--dusty-blue); border-color: var(--dusty-blue); color: #fff; }
+.item-row.is-purchased .stage-btn:last-child { background: var(--moss); border-color: var(--moss); }
+.stage-line { width: 8px; height: 2px; background: var(--border); flex-shrink: 0; }
+.stage-line.active { background: var(--dusty-blue); }
+
+.item-main { flex: 1; min-width: 0; }
+.item-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.item-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.item-row.is-purchased .item-name { color: var(--muted); text-decoration: line-through; }
+
+.badge { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.badge-must { background: #FBEBD5; color: var(--apricot-dark); }
+.badge-nice { background: #EAF0E3; color: var(--moss-dark); }
+.badge-consider { background: #E7EEF0; color: #5C7680; }
+
+.item-meta-row { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+.item-note { color: var(--muted); font-style: italic; }
+
+.status-dates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.date-chip {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 999px; border: none;
+}
+.date-chip.listed { background: #E7EEF0; color: #5C7680; }
+.date-chip.purchased { background: #EAF0E3; color: var(--moss-dark); }
+.date-chip.none { background: var(--paper); color: var(--muted); border: 1px dashed var(--border); font-weight: 500; }
+
+.date-editor { display: inline-flex; align-items: center; gap: 5px; background: var(--paper); border: 1px solid var(--border); border-radius: 999px; padding: 3px 4px 3px 9px; color: var(--ink-soft); }
+.date-editor input { border: none; background: transparent; font-size: 11.5px; outline: none; color: var(--ink); width: 116px; }
+.mini-x { width: 18px; height: 18px; border-radius: 50%; border: none; background: var(--border); color: var(--ink-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; }
+
+.item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.icon-btn {
+  width: 30px; height: 30px; border-radius: 8px; border: none; background: transparent;
+  color: var(--ink-soft); display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease; font-size: 14px;
+}
+.icon-btn:hover { background: var(--paper); color: var(--ink); }
+.icon-btn.small { width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; }
+.icon-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.icon-btn:disabled:hover { background: transparent; color: var(--ink-soft); }
+
+.footer-actions { display: flex; justify-content: center; padding: 14px 0 4px; }
+.link-btn { background: none; border: none; color: var(--moss-dark); font-size: 12.5px; font-weight: 600; text-decoration: underline; padding: 0; }
+.link-btn.muted { color: var(--muted); }
+
+/* ---------- Modal ---------- */
+
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(52,48,42,0.45);
+  display: flex; align-items: flex-end; justify-content: center; z-index: 50;
+}
+.modal-card {
+  background: var(--card); width: 100%; max-width: 480px; max-height: 88vh; overflow: hidden;
+  border-radius: 20px 20px 0 0; padding: 0; animation: slideUp 0.25s ease;
+  display: flex; flex-direction: column;
+}
+@supports (max-height: 88dvh) {
+  .modal-card { max-height: 88dvh; }
+}
+@media (min-width: 640px) {
+  .modal-overlay { align-items: center; }
+  .modal-card { border-radius: 20px; }
+}
+@keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 20px 14px; margin-bottom: 0; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h2 { font-size: 18px; }
+
+.modal-scroll-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 20px; }
+
+.modal-form { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.modal-form .modal-scroll-body { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.field > span { font-size: 12.5px; color: var(--ink-soft); font-weight: 600; }
+.field input, .field select {
+  border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px; font-size: 14px; outline: none; background: var(--paper);
+}
+.field input:focus, .field select:focus { border-color: var(--moss); }
+.field-row { display: flex; gap: 12px; }
+
+.priority-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+.priority-picker input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.priority-picker label {
+  border: 1px solid var(--border); background: var(--paper); border-radius: 999px;
+  padding: 7px 13px; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+}
+.priority-picker input[value="must"]:checked + label { background: var(--apricot); border-color: var(--apricot); color: #fff; }
+.priority-picker input[value="nice"]:checked + label { background: var(--moss); border-color: var(--moss); color: #fff; }
+.priority-picker input[value="consider"]:checked + label { background: var(--dusty-blue); border-color: var(--dusty-blue); color: #fff; }
+
+.date-input-row { display: flex; align-items: center; gap: 6px; }
+.date-input-row input { flex: 1; }
+
+.modal-actions {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding: 14px 20px 18px; margin-top: 0; flex-shrink: 0;
+  border-top: 1px solid var(--border); background: var(--card);
+}
+
+/* ---------- Template modal ---------- */
+
+.template-card { max-width: 560px; }
+.template-intro { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 14px; }
+.template-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
+.template-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.template-group-title { display: flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 700; color: var(--moss-dark); }
+.template-items { display: flex; flex-direction: column; gap: 2px; }
+.template-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; font-size: 13px; cursor: pointer; }
+.template-item:hover { background: var(--paper); }
+.template-item input { width: 16px; height: 16px; accent-color: var(--moss); flex-shrink: 0; }
+.template-item-name { flex: 1; color: var(--ink); }
+.template-item-meta { font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
+
+/* ---------- Category manager modal ---------- */
+
+.category-manager-card { max-width: 520px; }
+.cat-manage-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.cat-manage-row { display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 12px; background: var(--paper); }
+.cat-manage-order { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+.cat-manage-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: var(--moss-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+.cat-manage-label { flex: 1; display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.cat-manage-label span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-manage-count { font-size: 11px; font-weight: 500; color: var(--ink-soft); flex-shrink: 0; }
+.cat-manage-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+.cat-manage-edit { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.cat-manage-edit input[type="text"] { border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; font-size: 13px; outline: none; background: var(--card); }
+.cat-manage-edit input[type="text"]:focus { border-color: var(--moss); }
+.cat-manage-edit-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.icon-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.icon-picker input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.icon-picker label {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--card); color: var(--ink-soft); display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 15px; cursor: pointer;
+}
+.icon-picker input:checked + label { background: var(--moss); border-color: var(--moss); }
+
+.cat-add-form { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px dashed var(--border); border-radius: 14px; margin-bottom: 6px; }
+.cat-add-title { font-size: 12.5px; font-weight: 700; color: var(--moss-dark); }
+.cat-add-form input[type="text"] { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13.5px; outline: none; background: var(--card); }
+.cat-add-form input[type="text"]:focus { border-color: var(--moss); }
+.cat-add-form .btn { align-self: flex-end; }
+
+.mini-btn { font-size: 11.5px; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--border); background: var(--card); color: var(--ink-soft); white-space: nowrap; }
+.mini-btn.danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+.mini-btn.primary { background: var(--moss); color: #fff; border-color: var(--moss); }
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .hero-body { flex-direction: column; align-items: stretch; text-align: left; }
+  .sprout-svg { align-self: center; }
+  .toolbar-buttons { margin-left: 0; width: 100%; }
+  .toolbar-buttons .btn { flex: 1; justify-content: center; }
+  .field-row { flex-direction: column; }
+  .hero-top-actions { align-items: stretch; width: 100%; }
+  .hero-top-actions .btn.small { align-self: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ===========================================================
+   すくすくリスト（スタンドアロン版）
+   React不要・Claude不要。localStorage + JSONバックアップで
+   どの環境でもデータを保持できます。
+=========================================================== */
+
+/* ---------------- 定数 ---------------- */
+
+const STORAGE_KEY = "sukusukuList.v1";
+
+const CATEGORY_ICONS = {
+  shirt: "👕", milk: "🍼", droplets: "💧", moon: "🌙", bath: "🛁",
+  car: "🚗", shield: "🛡️", heart: "❤️", package: "📦", sparkles: "✨",
+  gift: "🎁", baby: "👶", star: "⭐", tag: "🏷️", camera: "📷", book: "📖",
+};
+
+const DEFAULT_CATEGORIES = [
+  { id: "wear", label: "肌着・ベビー服", iconKey: "shirt" },
+  { id: "feeding", label: "授乳・ミルク", iconKey: "milk" },
+  { id: "diaper", label: "おむつ・スキンケア", iconKey: "droplets" },
+  { id: "sleep", label: "寝具・ねんね", iconKey: "moon" },
+  { id: "bath", label: "お風呂・沐浴", iconKey: "bath" },
+  { id: "outing", label: "外出・お出かけ", iconKey: "car" },
+  { id: "safety", label: "安全・ケア用品", iconKey: "shield" },
+  { id: "mom", label: "ママ・パパ用品", iconKey: "heart" },
+  { id: "other", label: "その他", iconKey: "package" },
+];
+
+const PRIORITIES = [
+  { id: "must", label: "必須", className: "badge-must" },
+  { id: "nice", label: "あると便利", className: "badge-nice" },
+  { id: "consider", label: "検討中", className: "badge-consider" },
+];
+const PRIORITY_MAP = PRIORITIES.reduce((a, p) => (a[p.id] = p, a), {});
+
+const TEMPLATE_ITEMS = [
+  { name: "短肌着", category: "wear", qty: 6, price: 600, priority: "must" },
+  { name: "コンビ肌着", category: "wear", qty: 6, price: 800, priority: "must" },
+  { name: "ツーウェイオール", category: "wear", qty: 3, price: 1200, priority: "must" },
+  { name: "靴下", category: "wear", qty: 3, price: 500, priority: "nice" },
+  { name: "帽子(退院用)", category: "wear", qty: 1, price: 1500, priority: "nice" },
+  { name: "スタイ・よだれかけ", category: "wear", qty: 5, price: 300, priority: "nice" },
+  { name: "アウター・カバーオール", category: "wear", qty: 1, price: 2500, priority: "consider" },
+
+  { name: "哺乳瓶", category: "feeding", qty: 2, price: 1200, priority: "must" },
+  { name: "粉ミルク", category: "feeding", qty: 1, price: 2000, priority: "must" },
+  { name: "授乳クッション", category: "feeding", qty: 1, price: 3000, priority: "nice" },
+  { name: "母乳パッド", category: "feeding", qty: 1, price: 800, priority: "nice" },
+  { name: "搾乳機", category: "feeding", qty: 1, price: 5000, priority: "consider" },
+  { name: "哺乳瓶用洗浄ブラシ", category: "feeding", qty: 1, price: 500, priority: "must" },
+  { name: "哺乳瓶・乳首の消毒グッズ", category: "feeding", qty: 1, price: 3000, priority: "must" },
+
+  { name: "新生児用紙おむつ", category: "diaper", qty: 1, price: 700, priority: "must" },
+  { name: "おしりふき", category: "diaper", qty: 3, price: 900, priority: "must" },
+  { name: "おむつ替えシート", category: "diaper", qty: 1, price: 1500, priority: "nice" },
+  { name: "おむつ用ゴミ箱", category: "diaper", qty: 1, price: 4000, priority: "nice" },
+  { name: "ベビーローション", category: "diaper", qty: 1, price: 1200, priority: "nice" },
+  { name: "爪切りばさみ", category: "diaper", qty: 1, price: 800, priority: "must" },
+  { name: "綿棒(ベビー用)", category: "diaper", qty: 1, price: 400, priority: "must" },
+
+  { name: "ベビーベッド", category: "sleep", qty: 1, price: 15000, priority: "consider" },
+  { name: "ベビー布団セット", category: "sleep", qty: 1, price: 8000, priority: "must" },
+  { name: "おくるみ", category: "sleep", qty: 2, price: 2000, priority: "nice" },
+  { name: "スワドル・スリーパー", category: "sleep", qty: 2, price: 2500, priority: "nice" },
+  { name: "ベビーモニター", category: "sleep", qty: 1, price: 6000, priority: "consider" },
+
+  { name: "ベビーバス", category: "bath", qty: 1, price: 3000, priority: "must" },
+  { name: "湯温計", category: "bath", qty: 1, price: 800, priority: "nice" },
+  { name: "ベビーソープ・沐浴剤", category: "bath", qty: 1, price: 1000, priority: "must" },
+  { name: "ガーゼハンカチ", category: "bath", qty: 10, price: 1500, priority: "must" },
+  { name: "バスタオル(フード付き)", category: "bath", qty: 2, price: 2500, priority: "nice" },
+
+  { name: "チャイルドシート", category: "outing", qty: 1, price: 25000, priority: "must" },
+  { name: "ベビーカー", category: "outing", qty: 1, price: 30000, priority: "must" },
+  { name: "抱っこ紐", category: "outing", qty: 1, price: 12000, priority: "must" },
+  { name: "マザーズバッグ", category: "outing", qty: 1, price: 5000, priority: "nice" },
+  { name: "授乳ケープ", category: "outing", qty: 1, price: 2500, priority: "consider" },
+
+  { name: "体温計(ベビー用)", category: "safety", qty: 1, price: 2000, priority: "must" },
+  { name: "コーナーガード", category: "safety", qty: 1, price: 1000, priority: "consider" },
+  { name: "ベビーゲート", category: "safety", qty: 1, price: 6000, priority: "consider" },
+  { name: "見守りカメラ", category: "safety", qty: 1, price: 5000, priority: "consider" },
+
+  { name: "産褥ショーツ", category: "mom", qty: 3, price: 1500, priority: "must" },
+  { name: "母乳パッド(ママ用)", category: "mom", qty: 1, price: 800, priority: "nice" },
+  { name: "骨盤ベルト", category: "mom", qty: 1, price: 3000, priority: "nice" },
+  { name: "マタニティ・授乳パジャマ", category: "mom", qty: 2, price: 4000, priority: "must" },
+  { name: "会陰ケア用品", category: "mom", qty: 1, price: 1500, priority: "consider" },
+
+  { name: "母子手帳ケース", category: "other", qty: 1, price: 2000, priority: "nice" },
+  { name: "退院時の服(セレモニードレス)", category: "other", qty: 1, price: 5000, priority: "consider" },
+  { name: "手形足形キット", category: "other", qty: 1, price: 1500, priority: "consider" },
+];
+
+/* ---------------- ユーティリティ ---------------- */
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function formatYen(n) { return "¥" + (Number(n) || 0).toLocaleString("ja-JP"); }
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function formatDateShort(s) {
+  if (!s) return "";
+  const [y, m, d] = s.split("-").map(Number);
+  return `${y}/${m}/${d}`;
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(dateStr + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target - today) / 86400000);
+}
+function getStatus(item) {
+  if (item.purchasedDate) return "purchased";
+  if (item.amazonDate) return "listed";
+  return "none";
+}
+
+/* ---------------- 状態 & 永続化 ---------------- */
+
+let state = {
+  items: [],
+  categories: DEFAULT_CATEGORIES.map((c) => ({ ...c })),
+  settings: { dueDate: "", budget: "" },
+};
+
+let ui = {
+  search: "",
+  categoryFilter: "all",
+  priorityFilter: "all",
+  statusFilter: "all",
+  addModalOpen: false,
+  editingItemId: null,
+  newItemCategory: null,
+  templateModalOpen: false,
+  categoryManagerOpen: false,
+  categoryEditingId: null,
+  editingDateField: null, // { itemId, field }
+  bannerDismissed: false,
+};
+
+let saveTimer = null;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn("保存に失敗しました（ブラウザのストレージ制限の可能性があります）", e);
+    }
+  }, 300);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if (Array.isArray(parsed.items)) {
+          state.items = parsed.items.map((it) => {
+            if (it.amazonDate !== undefined || it.purchasedDate !== undefined) return it;
+            return { ...it, amazonDate: null, purchasedDate: it.purchased ? todayISO() : null };
+          });
+        }
+        if (Array.isArray(parsed.categories) && parsed.categories.length > 0) state.categories = parsed.categories;
+        if (parsed.settings) state.settings = { dueDate: parsed.settings.dueDate || "", budget: parsed.settings.budget || "" };
+      }
+    }
+  } catch (e) {
+    console.warn("読み込みに失敗しました", e);
+  }
+  // 起動時は常に、不足しているテンプレート項目を自動で補う（重複は追加しない）
+  ensureTemplateItemsPresent();
+}
+
+function ensureTemplateItemsPresent() {
+  const existingNames = new Set(state.items.map((i) => i.name));
+  const missing = TEMPLATE_ITEMS.filter((t) => !existingNames.has(t.name));
+  if (missing.length === 0) return;
+  const newItems = missing.map((item) => ({
+    ...item, id: uid(), note: "", amazonDate: null, purchasedDate: null,
+  }));
+  state.items.push(...newItems);
+  scheduleSave();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const d = new Date();
+  const stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+  a.href = url;
+  a.download = `sukusuku-list-backup-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importDataFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!parsed || !Array.isArray(parsed.items) || !Array.isArray(parsed.categories)) {
+        alert("このファイルは、すくすくリストのバックアップ形式ではないようです。");
+        return;
+      }
+      if (!confirm("現在のデータを、読み込んだバックアップの内容で上書きします。よろしいですか？")) return;
+      state = {
+        items: parsed.items,
+        categories: parsed.categories,
+        settings: parsed.settings || { dueDate: "", budget: "" },
+      };
+      scheduleSave();
+      renderAll();
+      alert("バックアップを読み込みました。");
+    } catch (e) {
+      alert("ファイルの読み込みに失敗しました。JSON形式のバックアップファイルを選択してください。");
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------------- 芽のイラスト ---------------- */
+
+function sproutSvg(percent) {
+  const p = Math.max(0, Math.min(100, percent));
+  const maxStemHeight = 88;
+  const stemHeight = Math.max(8, (p / 100) * maxStemHeight);
+  const stemTopY = 152 - stemHeight;
+  const leaf1On = p >= 20, leaf2On = p >= 50, bloomOn = p >= 90;
+  const bloom = bloomOn
+    ? `<circle cx="60" cy="${stemTopY - 2}" r="7" fill="var(--apricot)" />
+       <circle cx="50" cy="${stemTopY + 3}" r="6" fill="var(--apricot-light)" />
+       <circle cx="70" cy="${stemTopY + 3}" r="6" fill="var(--apricot-light)" />
+       <circle cx="60" cy="${stemTopY - 2}" r="3" fill="var(--apricot-dark)" />`
+    : `<circle cx="60" cy="${stemTopY}" r="4.5" fill="var(--moss-light)" />`;
+  return `
+  <svg class="sprout-svg" viewBox="0 0 120 172" width="96" height="138" role="img" aria-label="準備の進み具合 ${p}%">
+    <path d="M40 150 L80 150 L74 170 L46 170 Z" fill="var(--clay)" />
+    <rect x="38" y="145" width="44" height="8" rx="3" fill="var(--clay-dark)" />
+    <ellipse cx="60" cy="150" rx="20" ry="5" fill="var(--soil)" />
+    <rect class="sprout-stem" x="58" y="${stemTopY}" width="4" height="${stemHeight}" rx="2" fill="var(--moss)" />
+    <g class="sprout-leaf" style="opacity:${leaf1On ? 1 : 0}; transform:${leaf1On ? "scale(1)" : "scale(0.4)"}; transform-origin:60px 122px;">
+      <ellipse cx="46" cy="120" rx="14" ry="7" fill="var(--moss-light)" transform="rotate(-25 46 120)" />
+      <ellipse cx="74" cy="120" rx="14" ry="7" fill="var(--moss-light)" transform="rotate(25 74 120)" />
+    </g>
+    <g class="sprout-leaf" style="opacity:${leaf2On ? 1 : 0}; transform:${leaf2On ? "scale(1)" : "scale(0.4)"}; transform-origin:60px 92px;">
+      <ellipse cx="44" cy="90" rx="15" ry="7.5" fill="var(--moss)" transform="rotate(-20 44 90)" />
+      <ellipse cx="76" cy="90" rx="15" ry="7.5" fill="var(--moss)" transform="rotate(20 76 90)" />
+    </g>
+    <g style="transform:${bloomOn ? "scale(1)" : "scale(0.55)"}; transform-origin:60px ${stemTopY}px;">${bloom}</g>
+  </svg>`;
+}
+
+/* ---------------- 集計ヘルパー ---------------- */
+
+function computeStats() {
+  const items = state.items;
+  const totalCount = items.length;
+  const purchasedCount = items.filter((i) => i.purchasedDate).length;
+  const listedOnlyCount = items.filter((i) => i.amazonDate && !i.purchasedDate).length;
+  const noneCount = items.filter((i) => !i.amazonDate && !i.purchasedDate).length;
+  const overallPercent = totalCount ? Math.round((purchasedCount / totalCount) * 100) : 0;
+  const totalCost = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const spentCost = items.filter((i) => i.purchasedDate).reduce((s, i) => s + i.price * i.qty, 0);
+  const budgetNum = Number(state.settings.budget) || 0;
+  const remaining = budgetNum - spentCost;
+  const remainingToBuyCost = totalCost - spentCost;
+  return { totalCount, purchasedCount, listedOnlyCount, noneCount, overallPercent, totalCost, spentCost, remaining, remainingToBuyCost };
+}
+
+function matchesFilters(item) {
+  if (ui.search.trim()) {
+    const q = ui.search.trim().toLowerCase();
+    if (!item.name.toLowerCase().includes(q) && !(item.note || "").toLowerCase().includes(q)) return false;
+  }
+  if (ui.categoryFilter !== "all" && item.category !== ui.categoryFilter) return false;
+  if (ui.priorityFilter !== "all" && item.priority !== ui.priorityFilter) return false;
+  if (ui.statusFilter !== "all" && getStatus(item) !== ui.statusFilter) return false;
+  return true;
+}
+
+/* ---------------- データ操作 ---------------- */
+
+function setItemDate(id, field, value) {
+  const key = field === "amazon" ? "amazonDate" : "purchasedDate";
+  const item = state.items.find((i) => i.id === id);
+  if (item) item[key] = value || null;
+  scheduleSave();
+}
+function deleteItem(id) {
+  if (!confirm("このアイテムを削除しますか？")) return;
+  state.items = state.items.filter((i) => i.id !== id);
+  scheduleSave();
+  renderList();
+}
+function saveItemFromForm(form, editingId) {
+  const fd = new FormData(form);
+  const name = (fd.get("name") || "").toString().trim();
+  if (!name) return false;
+  const item = {
+    id: editingId || uid(),
+    name,
+    category: fd.get("category"),
+    qty: Number(fd.get("qty")) || 0,
+    price: Number(fd.get("price")) || 0,
+    priority: fd.get("priority") || "must",
+    note: (fd.get("note") || "").toString().trim(),
+    amazonDate: fd.get("amazonDate") || null,
+    purchasedDate: fd.get("purchasedDate") || null,
+  };
+  if (editingId) {
+    const idx = state.items.findIndex((i) => i.id === editingId);
+    if (idx >= 0) state.items[idx] = item;
+  } else {
+    state.items.push(item);
+  }
+  scheduleSave();
+  return true;
+}
+function clearAllItems() {
+  if (!confirm("すべてのアイテムを削除します。よろしいですか？")) return;
+  state.items = [];
+  scheduleSave();
+  renderList();
+}
+
+function moveCategory(index, dir) {
+  const next = [...state.categories];
+  const newIndex = index + dir;
+  if (newIndex < 0 || newIndex >= next.length) return;
+  [next[index], next[newIndex]] = [next[newIndex], next[index]];
+  state.categories = next;
+  scheduleSave();
+  renderCategoryManager();
+  renderList();
+}
+function addCategoryFromForm(form) {
+  const fd = new FormData(form);
+  const label = (fd.get("label") || "").toString().trim();
+  if (!label) return;
+  const iconKey = fd.get("iconKey") || "package";
+  state.categories.push({ id: "cat_" + uid(), label, iconKey });
+  scheduleSave();
+  form.reset();
+  renderCategoryManager();
+}
+function updateCategoryFromForm(form, id) {
+  const fd = new FormData(form);
+  const label = (fd.get("label") || "").toString().trim();
+  if (!label) return;
+  const iconKey = fd.get("iconKey") || "package";
+  const cat = state.categories.find((c) => c.id === id);
+  if (cat) { cat.label = label; cat.iconKey = iconKey; }
+  ui.categoryEditingId = null;
+  scheduleSave();
+  renderCategoryManager();
+  renderList();
+}
+function deleteCategory(id) {
+  const count = state.items.filter((i) => i.category === id).length;
+  const msg = count > 0 ? `このカテゴリには ${count} 件のアイテムがあります。削除すると他のカテゴリへ自動的に移動します。続けますか？` : "このカテゴリを削除しますか？";
+  if (!confirm(msg)) return;
+  const remaining = state.categories.filter((c) => c.id !== id);
+  if (remaining.length === 0) { alert("最後の1つのカテゴリは削除できません。"); return; }
+  const fallback = remaining.find((c) => c.id === "other") || remaining[0];
+  state.items.forEach((i) => { if (i.category === id) i.category = fallback.id; });
+  state.categories = remaining;
+  if (ui.categoryFilter === id) ui.categoryFilter = "all";
+  scheduleSave();
+  renderCategoryManager();
+  renderList();
+}
+
+/* ---------------- レンダリング ---------------- */
+
+const root = document.getElementById("app");
+
+function renderAll() {
+  root.innerHTML = `
+    <div id="storage-banner-area"></div>
+    <header class="hero" id="header-area"></header>
+    <div class="toolbar" id="toolbar-area"></div>
+    <div class="backup-row">
+      <button class="btn ghost" data-action="export-data">💾 バックアップを保存（JSON）</button>
+      <button class="btn ghost" data-action="trigger-import">📂 バックアップを読み込む</button>
+      <input type="file" id="import-file-input" accept="application/json" style="display:none" />
+    </div>
+    <main class="list-area" id="list-area"></main>
+    <div id="modal-area"></div>
+  `;
+  renderBanner();
+  renderHeader();
+  renderToolbar();
+  renderList();
+  renderModal();
+  bindGlobalEvents();
+}
+
+function renderBanner() {
+  const area = document.getElementById("storage-banner-area");
+  if (ui.bannerDismissed) { area.innerHTML = ""; return; }
+  area.innerHTML = `
+    <div class="storage-banner">
+      <span>📱 このページはお使いのブラウザに自動保存されます。別の端末で使う場合や、念のためのバックアップには「バックアップを保存」をご利用ください。</span>
+      <button data-action="dismiss-banner">閉じる</button>
+    </div>`;
+}
+
+function renderHeader() {
+  const stats = computeStats();
+  const daysLeft = daysUntil(state.settings.dueDate);
+  let countdown = "";
+  if (daysLeft !== null) {
+    const cls = daysLeft < 0 ? "past" : daysLeft <= 14 ? "soon" : "";
+    const text = daysLeft > 0 ? `あと ${daysLeft} 日` : daysLeft === 0 ? "本日が予定日です" : `予定日から ${Math.abs(daysLeft)} 日経過`;
+    countdown = `<span class="countdown-badge ${cls}" id="countdown-badge">${text}</span>`;
+  } else {
+    countdown = `<span id="countdown-badge"></span>`;
+  }
+
+  document.getElementById("header-area").innerHTML = `
+    <div class="hero-top">
+      <div class="brand">
+        <div class="brand-icon">🌱</div>
+        <div>
+          <h1>すくすくリスト</h1>
+          <p class="tagline">産前にそろえる、育児グッズの準備帳</p>
+        </div>
+      </div>
+      <div class="hero-top-actions">
+        <button type="button" class="btn ghost small" data-action="open-category-manager">🗂️ カテゴリを管理</button>
+        <div class="due-date-control">
+          <label class="due-date-field">
+            📅 <span>出産予定日</span>
+            <input type="date" id="due-date-input" value="${esc(state.settings.dueDate)}" />
+          </label>
+          ${countdown}
+        </div>
+      </div>
+    </div>
+    <div class="hero-body">
+      ${sproutSvg(stats.overallPercent)}
+      <div class="hero-stats">
+        <div class="stat-row">
+          <span class="stat-label">全体の準備状況</span>
+          <span class="stat-value" id="stat-value">${stats.overallPercent}%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:${stats.overallPercent}%"></div></div>
+        <span class="stat-sub" id="stat-sub">${stats.totalCount === 0 ? "まだアイテムがありません" : `購入済み ${stats.purchasedCount} 件 ／ Amazon追加済み ${stats.listedOnlyCount} 件 ／ 未定 ${stats.noneCount} 件`}</span>
+        <div class="budget-row">
+          <label class="budget-field">
+            💰 <span>予算</span>
+            <input type="number" min="0" step="1000" placeholder="未設定" id="budget-input" value="${esc(state.settings.budget)}" />
+            <span>円</span>
+          </label>
+          <div class="budget-summary" id="budget-summary"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  refreshBudgetSummary();
+}
+
+function refreshBudgetSummary() {
+  const stats = computeStats();
+  const el = document.getElementById("budget-summary");
+  if (!el) return;
+  let html = `<span>合計見込み <strong>${formatYen(stats.totalCost)}</strong></span>` +
+             `<span>購入済み <strong>${formatYen(stats.spentCost)}</strong></span>` +
+             `<span>未購入分 <strong>${formatYen(stats.remainingToBuyCost)}</strong></span>`;
+  if (state.settings.budget !== "") {
+    html += `<span class="${stats.remaining < 0 ? "over-budget" : ""}">予算残り <strong>${formatYen(stats.remaining)}</strong></span>`;
+  }
+  el.innerHTML = html;
+}
+
+function refreshCountdown() {
+  const daysLeft = daysUntil(state.settings.dueDate);
+  const el = document.getElementById("countdown-badge");
+  if (!el) return;
+  if (daysLeft === null) { el.className = ""; el.textContent = ""; return; }
+  el.className = "countdown-badge " + (daysLeft < 0 ? "past" : daysLeft <= 14 ? "soon" : "");
+  el.textContent = daysLeft > 0 ? `あと ${daysLeft} 日` : daysLeft === 0 ? "本日が予定日です" : `予定日から ${Math.abs(daysLeft)} 日経過`;
+}
+
+function renderToolbar() {
+  const catOptions = state.categories.map((c) => `<option value="${c.id}" ${ui.categoryFilter === c.id ? "selected" : ""}>${esc(c.label)}</option>`).join("");
+  const prOptions = PRIORITIES.map((p) => `<option value="${p.id}" ${ui.priorityFilter === p.id ? "selected" : ""}>${esc(p.label)}</option>`).join("");
+  document.getElementById("toolbar-area").innerHTML = `
+    <div class="search-box">
+      🔍 <input type="text" id="search-input" placeholder="アイテムを検索" value="${esc(ui.search)}" />
+    </div>
+    <select class="filter-select" id="filter-category">
+      <option value="all" ${ui.categoryFilter === "all" ? "selected" : ""}>すべてのカテゴリ</option>
+      ${catOptions}
+    </select>
+    <select class="filter-select" id="filter-priority">
+      <option value="all" ${ui.priorityFilter === "all" ? "selected" : ""}>すべての優先度</option>
+      ${prOptions}
+    </select>
+    <select class="filter-select" id="filter-status">
+      <option value="all" ${ui.statusFilter === "all" ? "selected" : ""}>すべて</option>
+      <option value="none" ${ui.statusFilter === "none" ? "selected" : ""}>未定のみ</option>
+      <option value="listed" ${ui.statusFilter === "listed" ? "selected" : ""}>Amazon追加済みのみ</option>
+      <option value="purchased" ${ui.statusFilter === "purchased" ? "selected" : ""}>購入済みのみ</option>
+    </select>
+    <div class="toolbar-buttons">
+      <button type="button" class="btn ghost" data-action="open-template-modal">📋 テンプレート</button>
+      <button type="button" class="btn primary" data-action="open-add-item">＋ アイテムを追加</button>
+    </div>
+  `;
+}
+
+function itemRowHtml(item) {
+  const priority = PRIORITY_MAP[item.priority] || PRIORITIES[0];
+  const hasAmazon = !!item.amazonDate, hasPurchased = !!item.purchasedDate;
+  const editingAmazon = ui.editingDateField && ui.editingDateField.itemId === item.id && ui.editingDateField.field === "amazon";
+  const editingPurchased = ui.editingDateField && ui.editingDateField.itemId === item.id && ui.editingDateField.field === "purchased";
+
+  let amazonBlock;
+  if (editingAmazon) {
+    amazonBlock = `<span class="date-editor">
+      🛒 <input type="date" value="${esc(item.amazonDate || "")}" data-action="date-editor-change" data-item-id="${item.id}" data-field="amazon" />
+      <button type="button" class="mini-x" data-action="date-editor-clear" data-item-id="${item.id}" data-field="amazon">✕</button>
+      <button type="button" class="mini-x" data-action="date-editor-close">✓</button>
+    </span>`;
+  } else if (hasAmazon) {
+    amazonBlock = `<button type="button" class="date-chip listed" data-action="open-date-editor" data-item-id="${item.id}" data-field="amazon">🛒 Amazon追加済み ${formatDateShort(item.amazonDate)}</button>`;
+  } else {
+    amazonBlock = "";
+  }
+
+  let purchasedBlock;
+  if (editingPurchased) {
+    purchasedBlock = `<span class="date-editor">
+      ✓ <input type="date" value="${esc(item.purchasedDate || "")}" data-action="date-editor-change" data-item-id="${item.id}" data-field="purchased" />
+      <button type="button" class="mini-x" data-action="date-editor-clear" data-item-id="${item.id}" data-field="purchased">✕</button>
+      <button type="button" class="mini-x" data-action="date-editor-close">✓</button>
+    </span>`;
+  } else if (hasPurchased) {
+    purchasedBlock = `<button type="button" class="date-chip purchased" data-action="open-date-editor" data-item-id="${item.id}" data-field="purchased">✓ 購入済み ${formatDateShort(item.purchasedDate)}</button>`;
+  } else {
+    purchasedBlock = "";
+  }
+
+  const noneChip = (!hasAmazon && !hasPurchased) ? `<span class="date-chip none">未定</span>` : "";
+
+  return `
+  <div class="item-row ${hasPurchased ? "is-purchased" : hasAmazon ? "is-listed" : ""}">
+    <div class="status-track">
+      <button type="button" class="stage-btn ${hasAmazon ? "done" : ""}" data-action="stage-toggle" data-item-id="${item.id}" data-field="amazon" title="Amazonリストに追加済み">🛒</button>
+      <span class="stage-line ${hasAmazon ? "active" : ""}"></span>
+      <button type="button" class="stage-btn ${hasPurchased ? "done" : ""}" data-action="stage-toggle" data-item-id="${item.id}" data-field="purchased" title="購入済み">✓</button>
+    </div>
+    <div class="item-main">
+      <div class="item-name-row">
+        <span class="item-name">${esc(item.name)}</span>
+        <span class="badge ${priority.className}">${priority.label}</span>
+      </div>
+      <div class="item-meta-row">
+        ${item.qty ? `<span>数量 ${item.qty}</span>` : ""}
+        <span>${formatYen(item.price)}${item.qty > 1 ? `（計 ${formatYen(item.price * item.qty)}）` : ""}</span>
+        ${item.note ? `<span class="item-note">${esc(item.note)}</span>` : ""}
+      </div>
+      <div class="status-dates">${amazonBlock}${purchasedBlock}${noneChip}</div>
+    </div>
+    <div class="item-actions">
+      <button type="button" class="icon-btn" data-action="edit-item" data-item-id="${item.id}" aria-label="編集">✎</button>
+      <button type="button" class="icon-btn" data-action="delete-item" data-item-id="${item.id}" aria-label="削除">🗑️</button>
+    </div>
+  </div>`;
+}
+
+function categorySectionHtml(cat) {
+  const allItems = state.items.filter((i) => i.category === cat.id);
+  const filtered = allItems.filter(matchesFilters);
+  const purchased = allItems.filter((i) => i.purchasedDate).length;
+  const total = allItems.length;
+  const percent = total ? Math.round((purchased / total) * 100) : 0;
+  const filterActive = ui.search.trim() !== "" || ui.categoryFilter !== "all" || ui.priorityFilter !== "all" || ui.statusFilter !== "all";
+  const icon = CATEGORY_ICONS[cat.iconKey] || "📦";
+
+  const bodyHtml = filtered.length === 0
+    ? `<p class="empty-hint">${filterActive ? "条件に一致する項目はありません" : "アイテムがありません"}</p>`
+    : filtered.map(itemRowHtml).join("");
+
+  return `
+  <section class="category-section" data-category-id="${cat.id}">
+    <button type="button" class="category-header" data-action="toggle-collapse" data-category-id="${cat.id}">
+      <div class="category-title"><span class="cat-emoji">${icon}</span><span>${esc(cat.label)}</span></div>
+      <div class="category-header-right">
+        <div class="category-progress-track"><div class="category-progress-fill" style="width:${percent}%"></div></div>
+        <span class="category-count">${purchased}/${total}</span>
+        <span>${cat.collapsed ? "▾" : "▴"}</span>
+      </div>
+    </button>
+    ${cat.collapsed ? "" : `<div class="category-body">${bodyHtml}
+      <button type="button" class="category-add-btn" data-action="add-to-category" data-category-id="${cat.id}">＋ ${esc(cat.label)}に項目を追加</button>
+    </div>`}
+  </section>`;
+}
+
+function renderList() {
+  const listArea = document.getElementById("list-area");
+  refreshBudgetSummary();
+  refreshHeaderPercent();
+
+  if (state.items.length === 0) {
+    listArea.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🌱</div>
+        <h2>まだ何も準備していません</h2>
+        <p>テンプレートから始めるか、必要なものを自分で追加してみましょう。</p>
+        <div class="empty-state-actions">
+          <button type="button" class="btn primary" data-action="open-template-modal">テンプレートから始める</button>
+          <button type="button" class="btn ghost" data-action="open-add-item">アイテムを自分で追加</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const categoriesWithItems = state.categories.filter((c) => state.items.some((i) => i.category === c.id));
+  let html = categoriesWithItems.map(categorySectionHtml).join("");
+  html += `
+    <div class="footer-actions">
+      <button type="button" class="link-btn muted" data-action="clear-all">すべてのアイテムを削除</button>
+    </div>`;
+  listArea.innerHTML = html;
+}
+
+function refreshHeaderPercent() {
+  const stats = computeStats();
+  const valueEl = document.getElementById("stat-value");
+  const fillEl = document.getElementById("progress-fill");
+  const subEl = document.getElementById("stat-sub");
+  if (valueEl) valueEl.textContent = stats.overallPercent + "%";
+  if (fillEl) fillEl.style.width = stats.overallPercent + "%";
+  if (subEl) subEl.textContent = stats.totalCount === 0 ? "まだアイテムがありません" : `購入済み ${stats.purchasedCount} 件 ／ Amazon追加済み ${stats.listedOnlyCount} 件 ／ 未定 ${stats.noneCount} 件`;
+  // sprout illustration + header brand icon area needs full header re-render occasionally,
+  // but percent-driven stem/leaves are re-rendered on structural changes via renderHeader().
+  renderHeaderSproutOnly(stats.overallPercent);
+}
+
+function renderHeaderSproutOnly(percent) {
+  const heroBody = document.querySelector("#header-area .hero-body");
+  if (!heroBody) return;
+  const existing = heroBody.querySelector(".sprout-svg");
+  if (existing) existing.outerHTML = sproutSvg(percent);
+}
+
+/* ---------------- モーダル ---------------- */
+
+function renderModal() {
+  const area = document.getElementById("modal-area");
+  if (ui.addModalOpen) { area.innerHTML = itemModalHtml(); return; }
+  if (ui.templateModalOpen) { area.innerHTML = templateModalHtml(); return; }
+  if (ui.categoryManagerOpen) { area.innerHTML = categoryManagerModalHtml(); return; }
+  area.innerHTML = "";
+}
+function renderCategoryManager() {
+  if (ui.categoryManagerOpen) document.getElementById("modal-area").innerHTML = categoryManagerModalHtml();
+}
+
+function itemModalHtml() {
+  const editing = ui.editingItemId ? state.items.find((i) => i.id === ui.editingItemId) : null;
+  const defaultCategory = editing ? editing.category : (ui.newItemCategory || state.categories[0].id);
+  const catOptions = state.categories.map((c) => `<option value="${c.id}" ${c.id === defaultCategory ? "selected" : ""}>${esc(c.label)}</option>`).join("");
+  const priorityRadios = PRIORITIES.map((p) => {
+    const checked = (editing ? editing.priority : "must") === p.id ? "checked" : "";
+    const rid = "pr-" + p.id;
+    return `<input type="radio" id="${rid}" name="priority" value="${p.id}" ${checked} /><label for="${rid}">${p.label}</label>`;
+  }).join("");
+
+  return `
+  <div class="modal-overlay">
+    <div class="modal-card" data-stop="1">
+      <div class="modal-header">
+        <h2>${editing ? "アイテムを編集" : "アイテムを追加"}</h2>
+        <button type="button" class="icon-btn" data-action="close-item-modal" aria-label="閉じる">✕</button>
+      </div>
+      <form class="modal-form" id="item-form" data-editing-id="${editing ? editing.id : ""}">
+        <div class="modal-scroll-body">
+          <label class="field"><span>品名</span>
+            <input type="text" name="name" placeholder="例：短肌着" required value="${esc(editing ? editing.name : "")}" autofocus />
+          </label>
+          <label class="field"><span>カテゴリ</span>
+            <select name="category">${catOptions}</select>
+          </label>
+          <div class="field-row">
+            <label class="field"><span>数量</span><input type="number" name="qty" min="0" value="${editing ? editing.qty : 1}" /></label>
+            <label class="field"><span>単価（円）</span><input type="number" name="price" min="0" step="10" value="${editing ? editing.price : 0}" /></label>
+          </div>
+          <label class="field"><span>優先度</span>
+            <div class="priority-picker">${priorityRadios}</div>
+          </label>
+          <label class="field"><span>メモ（任意）</span>
+            <input type="text" name="note" placeholder="サイズ、色、購入予定店舗など" value="${esc(editing ? editing.note : "")}" />
+          </label>
+          <div class="field-row">
+            <label class="field"><span>Amazonリストに追加した日</span>
+              <input type="date" name="amazonDate" value="${esc(editing && editing.amazonDate ? editing.amazonDate : "")}" />
+            </label>
+            <label class="field"><span>購入した日</span>
+              <input type="date" name="purchasedDate" value="${esc(editing && editing.purchasedDate ? editing.purchasedDate : "")}" />
+            </label>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" data-action="close-item-modal">キャンセル</button>
+          <button type="button" class="btn primary" data-action="submit-item-form">${editing ? "更新する" : "追加する"}</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+
+function templateModalHtml() {
+  const existingNames = new Set(state.items.map((i) => i.name));
+  const grouped = {};
+  TEMPLATE_ITEMS.forEach((item, idx) => {
+    if (!grouped[item.category]) grouped[item.category] = [];
+    grouped[item.category].push({ ...item, _idx: idx });
+  });
+  const groupsHtml = state.categories.map((cat) => {
+    const items = grouped[cat.id];
+    if (!items) return "";
+    const icon = CATEGORY_ICONS[cat.iconKey] || "📦";
+    const rows = items.map((item) => {
+      const already = existingNames.has(item.name);
+      return `
+      <label class="template-item">
+        <input type="checkbox" name="tpl" value="${item._idx}" />
+        <span class="template-item-name">${esc(item.name)}</span>
+        <span class="template-item-meta">${item.qty > 1 ? `×${item.qty}　` : ""}目安${formatYen(item.price)}</span>
+        ${already ? `<span class="template-item-tag">追加済み</span>` : ""}
+      </label>`;
+    }).join("");
+    return `
+    <div class="template-group" data-category-id="${cat.id}">
+      <div class="template-group-header">
+        <div class="template-group-title">${icon} <span>${esc(cat.label)}</span></div>
+        <button type="button" class="link-btn" data-action="toggle-category-select" data-category-id="${cat.id}">全て選択</button>
+      </div>
+      <div class="template-items">${rows}</div>
+    </div>`;
+  }).join("");
+
+  return `
+  <div class="modal-overlay">
+    <div class="modal-card template-card" data-stop="1">
+      <div class="modal-header">
+        <h2>テンプレートから追加</h2>
+        <button type="button" class="icon-btn" data-action="close-template-modal" aria-label="閉じる">✕</button>
+      </div>
+      <form id="template-form" class="modal-form">
+        <div class="modal-scroll-body">
+          <p class="template-intro">先輩ママ・パパの定番リストです。必要なものにチェックして、まとめて追加できます。</p>
+          <div class="template-list">${groupsHtml}</div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" data-action="close-template-modal">キャンセル</button>
+          <button type="button" class="btn primary" data-action="submit-template-form">選択した項目を追加する</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+
+function categoryManagerModalHtml() {
+  const itemCounts = {};
+  state.items.forEach((i) => { itemCounts[i.category] = (itemCounts[i.category] || 0) + 1; });
+
+  const rows = state.categories.map((cat, index) => {
+    const icon = CATEGORY_ICONS[cat.iconKey] || "📦";
+    const count = itemCounts[cat.id] || 0;
+    if (ui.categoryEditingId === cat.id) {
+      const iconRadios = Object.keys(CATEGORY_ICONS).map((key) => {
+        const rid = "editicon-" + key;
+        return `<input type="radio" id="${rid}" name="iconKey" value="${key}" ${cat.iconKey === key ? "checked" : ""} /><label for="${rid}">${CATEGORY_ICONS[key]}</label>`;
+      }).join("");
+      return `
+      <div class="cat-manage-row">
+        <div class="cat-manage-order">
+          <button type="button" class="icon-btn small" data-action="move-category" data-index="${index}" data-dir="-1" ${index === 0 ? "disabled" : ""}>▴</button>
+          <button type="button" class="icon-btn small" data-action="move-category" data-index="${index}" data-dir="1" ${index === state.categories.length - 1 ? "disabled" : ""}>▾</button>
+        </div>
+        <form class="cat-manage-edit" data-category-id="${cat.id}">
+          <input type="text" name="label" value="${esc(cat.label)}" autofocus />
+          <div class="icon-picker">${iconRadios}</div>
+          <div class="cat-manage-edit-actions">
+            <button type="button" class="mini-btn" data-action="cancel-edit-category">キャンセル</button>
+            <button type="button" class="mini-btn primary" data-action="submit-edit-category-form" data-category-id="${cat.id}">保存</button>
+          </div>
+        </form>
+      </div>`;
+    }
+    return `
+    <div class="cat-manage-row">
+      <div class="cat-manage-order">
+        <button type="button" class="icon-btn small" data-action="move-category" data-index="${index}" data-dir="-1" ${index === 0 ? "disabled" : ""}>▴</button>
+        <button type="button" class="icon-btn small" data-action="move-category" data-index="${index}" data-dir="1" ${index === state.categories.length - 1 ? "disabled" : ""}>▾</button>
+      </div>
+      <div class="cat-manage-icon">${icon}</div>
+      <div class="cat-manage-label"><span>${esc(cat.label)}</span><span class="cat-manage-count">${count}件</span></div>
+      <div class="cat-manage-actions">
+        <button type="button" class="icon-btn" data-action="start-edit-category" data-category-id="${cat.id}" aria-label="編集">✎</button>
+        <button type="button" class="icon-btn" data-action="delete-category" data-category-id="${cat.id}" aria-label="削除" ${state.categories.length <= 1 ? "disabled" : ""}>🗑️</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  const addIconRadios = Object.keys(CATEGORY_ICONS).map((key) => {
+    const rid = "addicon-" + key;
+    return `<input type="radio" id="${rid}" name="iconKey" value="${key}" ${key === "package" ? "checked" : ""} /><label for="${rid}">${CATEGORY_ICONS[key]}</label>`;
+  }).join("");
+
+  return `
+  <div class="modal-overlay">
+    <div class="modal-card category-manager-card" data-stop="1">
+      <div class="modal-header">
+        <h2>カテゴリを管理</h2>
+        <button type="button" class="icon-btn" data-action="close-category-modal" aria-label="閉じる">✕</button>
+      </div>
+      <div class="modal-scroll-body">
+        <p class="template-intro">並び替えは上下の矢印で、名前やアイコンの変更は鉛筆アイコンから行えます。</p>
+        <div class="cat-manage-list">${rows}</div>
+        <form class="cat-add-form" id="add-category-form">
+          <span class="cat-add-title">新しいカテゴリを追加</span>
+          <input type="text" name="label" placeholder="カテゴリ名（例：おでかけ小物）" />
+          <div class="icon-picker">${addIconRadios}</div>
+          <button type="button" class="btn primary" data-action="submit-add-category-form">＋ カテゴリを追加</button>
+        </form>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" data-action="close-category-modal">閉じる</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- イベント処理 ---------------- */
+
+function bindGlobalEvents() {
+  // クリック（イベント委譲）
+  root.addEventListener("click", (e) => {
+    const overlay = e.target.closest(".modal-overlay");
+    if (overlay && e.target === overlay) {
+      closeAllModals();
+      return;
+    }
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+
+    switch (action) {
+      case "dismiss-banner":
+        ui.bannerDismissed = true; renderBanner(); break;
+
+      case "open-category-manager":
+        ui.categoryManagerOpen = true; ui.categoryEditingId = null; renderModal(); break;
+      case "close-category-modal":
+        ui.categoryManagerOpen = false; ui.categoryEditingId = null; renderModal(); break;
+      case "move-category":
+        moveCategory(Number(btn.dataset.index), Number(btn.dataset.dir)); break;
+      case "start-edit-category":
+        ui.categoryEditingId = btn.dataset.categoryId; renderCategoryManager(); break;
+      case "cancel-edit-category":
+        ui.categoryEditingId = null; renderCategoryManager(); break;
+      case "delete-category":
+        deleteCategory(btn.dataset.categoryId); break;
+
+      case "open-template-modal":
+        ui.templateModalOpen = true; renderModal(); break;
+      case "close-template-modal":
+        ui.templateModalOpen = false; renderModal(); break;
+      case "toggle-category-select": {
+        const group = btn.closest(".template-group");
+        const boxes = group.querySelectorAll('input[type="checkbox"]');
+        const allChecked = Array.from(boxes).every((b) => b.checked);
+        boxes.forEach((b) => (b.checked = !allChecked));
+        btn.textContent = allChecked ? "全て選択" : "全て解除";
+        break;
+      }
+
+      case "open-add-item":
+        ui.editingItemId = null; ui.newItemCategory = null; ui.addModalOpen = true; renderModal(); break;
+      case "add-to-category":
+        ui.editingItemId = null; ui.newItemCategory = btn.dataset.categoryId; ui.addModalOpen = true; renderModal(); break;
+      case "edit-item":
+        ui.editingItemId = btn.dataset.itemId; ui.newItemCategory = null; ui.addModalOpen = true; renderModal(); break;
+      case "close-item-modal":
+        ui.addModalOpen = false; ui.editingItemId = null; ui.newItemCategory = null; renderModal(); break;
+      case "delete-item":
+        deleteItem(btn.dataset.itemId); break;
+
+      case "toggle-collapse": {
+        const cat = state.categories.find((c) => c.id === btn.dataset.categoryId);
+        if (cat) cat.collapsed = !cat.collapsed;
+        renderList();
+        break;
+      }
+
+      case "stage-toggle": {
+        const itemId = btn.dataset.itemId, field = btn.dataset.field;
+        const item = state.items.find((i) => i.id === itemId);
+        const current = field === "amazon" ? item.amazonDate : item.purchasedDate;
+        if (current) {
+          ui.editingDateField = { itemId, field };
+        } else {
+          setItemDate(itemId, field, todayISO());
+          ui.editingDateField = null;
+        }
+        renderList();
+        break;
+      }
+      case "open-date-editor":
+        ui.editingDateField = { itemId: btn.dataset.itemId, field: btn.dataset.field };
+        renderList();
+        break;
+      case "date-editor-clear":
+        setItemDate(btn.dataset.itemId, btn.dataset.field, "");
+        ui.editingDateField = null;
+        renderList();
+        break;
+      case "date-editor-close":
+        ui.editingDateField = null;
+        renderList();
+        break;
+
+      case "clear-all":
+        clearAllItems(); break;
+
+      case "export-data":
+        exportData(); break;
+      case "trigger-import":
+        document.getElementById("import-file-input").click(); break;
+
+      case "submit-item-form": {
+        const form = document.getElementById("item-form");
+        const editingId = form.dataset.editingId || null;
+        if (saveItemFromForm(form, editingId)) {
+          ui.addModalOpen = false; ui.editingItemId = null; ui.newItemCategory = null;
+          renderModal(); renderList();
+        }
+        break;
+      }
+      case "submit-template-form": {
+        const form = document.getElementById("template-form");
+        const checked = Array.from(form.querySelectorAll('input[name="tpl"]:checked')).map((c) => Number(c.value));
+        if (checked.length === 0) {
+          alert("追加する項目を選択してください。");
+          break;
+        }
+        const newItems = checked.map((idx) => ({
+          ...TEMPLATE_ITEMS[idx], id: uid(), note: "", amazonDate: null, purchasedDate: null,
+        }));
+        state.items.push(...newItems);
+        scheduleSave();
+        ui.templateModalOpen = false;
+        renderModal(); renderList();
+        break;
+      }
+      case "submit-add-category-form": {
+        const form = document.getElementById("add-category-form");
+        addCategoryFromForm(form);
+        break;
+      }
+      case "submit-edit-category-form": {
+        const form = btn.closest("form");
+        updateCategoryFromForm(form, btn.dataset.categoryId);
+        break;
+      }
+    }
+  });
+
+  // change（フォームの日付選択・確定）
+  root.addEventListener("change", (e) => {
+    const el = e.target;
+    if (el.dataset && el.dataset.action === "date-editor-change") {
+      setItemDate(el.dataset.itemId, el.dataset.field, el.value);
+      return;
+    }
+    if (el.id === "due-date-input") {
+      state.settings.dueDate = el.value;
+      scheduleSave();
+      refreshCountdown();
+      return;
+    }
+    if (el.id === "filter-category") { ui.categoryFilter = el.value; renderList(); return; }
+    if (el.id === "filter-priority") { ui.priorityFilter = el.value; renderList(); return; }
+    if (el.id === "filter-status") { ui.statusFilter = el.value; renderList(); return; }
+    if (el.id === "import-file-input" && el.files && el.files[0]) {
+      importDataFromFile(el.files[0]);
+      el.value = "";
+      return;
+    }
+  });
+
+  // input（検索・予算は即時反映、フォーカスを失わないよう対象を限定して更新）
+  root.addEventListener("input", (e) => {
+    const el = e.target;
+    if (el.id === "search-input") { ui.search = el.value; renderList(); return; }
+    if (el.id === "budget-input") { state.settings.budget = el.value; scheduleSave(); refreshBudgetSummary(); return; }
+  });
+
+  // Enter キーで送信（テキスト入力からの入力確定を補助。date入力は対象外）
+  root.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    if (e.target.tagName !== "INPUT" || e.target.type === "date") return;
+    const form = e.target.closest("form");
+    if (!form) return;
+    const submitBtn = form.querySelector('[data-action^="submit-"]');
+    if (submitBtn) { e.preventDefault(); submitBtn.click(); }
+  });
+}
+
+function closeAllModals() {
+  ui.addModalOpen = false;
+  ui.templateModalOpen = false;
+  ui.categoryManagerOpen = false;
+  ui.editingItemId = null;
+  ui.newItemCategory = null;
+  ui.categoryEditingId = null;
+  renderModal();
+}
+
+/* ---------------- 初期化 ---------------- */
+
+function showFatalError(err) {
+  document.body.innerHTML =
+    '<div style="max-width:600px;margin:40px auto;padding:20px;font-family:sans-serif;' +
+    'background:#FBEBD5;border:1px solid #E2A15E;border-radius:12px;color:#34302A;">' +
+    '<h2 style="margin-top:0;">読み込み中にエラーが発生しました</h2>' +
+    '<p>お手数ですが、以下の内容と、お使いのブラウザ（Safari／Chromeなど）とOS（iPhone／Android等）を教えてください。</p>' +
+    '<pre style="white-space:pre-wrap;background:#fff;padding:10px;border-radius:8px;font-size:12px;">' +
+    (err && err.message ? err.message + "\n" + (err.stack || "") : String(err)) +
+    "</pre></div>";
+}
+
+window.addEventListener("error", (e) => {
+  console.error("Uncaught error:", e.error || e.message);
+});
+
+try {
+  loadState();
+  renderAll();
+} catch (err) {
+  showFatalError(err);
+}
+</script>
+</body>
+</html>
